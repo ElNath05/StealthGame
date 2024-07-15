@@ -12,6 +12,7 @@ public class MonsterCtrl : MonoBehaviour
     [SerializeField] private Transform pos1;
     [SerializeField] private Transform pos2;
 
+
     private bool changePos;
     // Start is called before the first frame update
     void Start()
@@ -23,15 +24,23 @@ public class MonsterCtrl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        _agent.SetDestination(targetTr.position);
+        RaycastHit hit;
 
         if (_agent.remainingDistance < 2f)
         {
             ChangeTarget();
         }
 
+        _agent.SetDestination(targetTr.position);
+
         Debug.DrawRay(transform.position, transform.forward * 10, Color.red);
-        //if(PhysicsRaycaster)
+        if (Physics.Raycast(transform.position, transform.forward * 10, out hit))
+        {
+            if (hit.transform.CompareTag("Player"))
+            {
+                Debug.Log("Player Hit");
+            }
+        }
     }
 
     void ChangeTarget()
