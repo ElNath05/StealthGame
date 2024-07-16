@@ -13,9 +13,9 @@ TagManager:
   - UI
   - Walkable
   - Swamp
-  - 
-  - 
-  - 
+  - Wall
+  - Player
+  - Ground
   - 
   - 
   - 
