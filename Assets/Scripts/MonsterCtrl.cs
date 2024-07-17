@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -10,6 +11,7 @@ public class MonsterCtrl : MonoBehaviour
 
     [SerializeField] private Transform pos1;
     [SerializeField] private Transform pos2;
+    [SerializeField] private Transform pos3;
 
     [SerializeField] private GameObject player;
 
@@ -23,10 +25,11 @@ public class MonsterCtrl : MonoBehaviour
 
     [SerializeField] private GameObject lineRendererPrefab; // LineRenderer 프리팹
     private bool changePos;
+    [SerializeField]  private int posNum = 0;
     private List<LineRenderer> lineRenderers = new List<LineRenderer>(); // LineRenderer 목록
 
-    private float alarmTimer;
-
+    [SerializeField]  private float alarmTimer;
+    [SerializeField]  private bool alertMod;
     void Start()
     {
         _agent = GetComponent<NavMeshAgent>();
@@ -54,37 +57,57 @@ public class MonsterCtrl : MonoBehaviour
 
         //게임매니저의 경계모드 전환용 변수가 참이면서 전투모드 상태가 아니면
         //guardStat의 값을 1로 만들고 맥스디스턴스 값을 1.25로 바꾸는 조건문
-        if (GameManager.Instance.alarm && guardStat==0)
+        if (GameManager.Instance.alarm && !alertMod && guardStat == 0)
         {
             maxDistance = 12.5f;
-            guardStat = 1;
+            alertMod = true;
+            if (Vector3.Distance(transform.position, GameManager.Instance.alarmPosition.position) < 30f)
+            {
+                alarmTimer = 0;
+                alertMod = false;
+                guardStat = 2;
+            }
         }
-
+        if (alertMod)
+        {
+            alarmTimer += Time.deltaTime;
+        }
+        if (alarmTimer > 5)
+        {
+            alertMod = false;
+            alarmTimer = 0;
+            maxDistance = 10;
+        }
         switch (guardStat)
         {
             case 0: // 일반모드
                 _agent.SetDestination(targetTr.position);
                 break;
-            case 1: // 경계모드
+            //case 1: // 경계모드
                 //타겟의 포지션이 목적지인코드+ 타이머가 돌아가는코드
-                alarmTimer += Time.deltaTime;
+                //_agent.SetDestination(targetTr.position);
                 //+ 타이머가 일정시간 지나면 타이머를 초기화하고 케이스값을 1로 설정하는 조건문
-                if(alarmTimer > 5)
-                {
-                    alarmTimer = 0;
-                    guardStat = 0;
-                }
-                break;
-            case 2: // 전투모드
-                _agent.SetDestination(player.transform.position);
-                break;
-            case 3: // 전투모드에 들어간 적에게 가는 상태
+                
+                //break;
+            case 2: // 알람을 울린 적에게 가는 상태
                 //대충 셋 데스티네이션을 전투모드인 적으로 설정하는 코드
+                _agent.SetDestination(GameManager.Instance.alarmPosition.position);
+                break;
+            case 3: // 전투모드
+                _agent.SetDestination(player.transform.position);
                 break;
         }
 
-        if (_agent.remainingDistance > maxDistance && guardStat == 2 || GameManager.Instance.isSafe)
+        
+        if (guardStat == 2 && !GameManager.Instance.alarm 
+            && Vector3.Distance(transform.position, GameManager.Instance.alarmPosition.position) < 5f)
         {
+            guardStat = 0;
+            maxDistance = 10;
+        }
+        if (_agent.remainingDistance > maxDistance && guardStat == 3 || GameManager.Instance.isSafe)
+        {
+            GameManager.Instance.alarm = false;
             guardStat = 0;
             maxDistance = 10;
         }
@@ -92,14 +115,26 @@ public class MonsterCtrl : MonoBehaviour
 
     void ChangeTarget()
     {
-        if (changePos)
+        if (posNum == 0)
         {
-            changePos = false;
+            posNum = 1;
+            changePos = true;
+            targetTr = pos2;
+        }
+        else if(posNum ==1 && !changePos)
+        {
+            posNum = 0;
             targetTr = pos1;
         }
-        else
+        else if(posNum == 1 && changePos)
         {
-            changePos = true;
+            posNum = 2;
+            targetTr = pos3;
+        }
+        else if(posNum == 2)
+        {
+            posNum = 1;
+            changePos= false;
             targetTr = pos2;
         }
     }
@@ -127,8 +162,10 @@ public class MonsterCtrl : MonoBehaviour
                     if (!Physics.Raycast(wallCheckRay, out RaycastHit wallHit, hit.distance, wallLayer))
                     {
                         maxDistance = 15;
-                        guardStat = 2; // 전투모드로 전환
+                        guardStat = 3; // 전투모드로 전환
                         //게임 매니저에서 경계모드 전환용 bool변수 참으로 변경
+                        GameManager.Instance.alarm = true;
+                        GameManager.Instance.alarmPosition = transform;
                     }
                 }
             }

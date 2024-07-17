@@ -34,4 +34,42 @@ public class Player : MonoBehaviour
         // 캐릭터 이동
         _controller.Move(move * speed * Time.deltaTime);
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            GameManager.Instance.gameOver = true;
+        }
+        if (other.CompareTag("Bkey"))
+        {
+            GameManager.Instance.hasBkey = true;
+            Destroy(other.gameObject);
+        }
+        if (other.CompareTag("Gkey"))
+        {
+            GameManager.Instance.hasGkey = true;
+            Destroy(other.gameObject);
+        }
+        if (other.CompareTag("Rkey"))
+        {
+            GameManager.Instance.hasRkey = true;
+            Destroy(other.gameObject);
+        }
+    }
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Safe"))
+        {
+            GameManager.Instance.isSafe = true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Safe"))
+        {
+            GameManager.Instance.isSafe = false;
+        }
+    }
 }

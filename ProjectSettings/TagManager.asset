@@ -3,7 +3,13 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Safe
+  - Enemy
+  - Bkey
+  - Gkey
+  - Rkey
+  - Clear
   layers:
   - Default
   - TransparentFX
