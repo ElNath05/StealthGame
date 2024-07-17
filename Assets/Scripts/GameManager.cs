@@ -56,7 +56,7 @@ public class GameManager : MonoBehaviour
                 Time.timeScale = 1;
                 overText.SetActive(false);
                 gameOver = false;
-                SceneManager.LoadScene(1);
+                SceneManager.LoadScene(0);
             }
         }
         if (gameClear)
@@ -68,7 +68,7 @@ public class GameManager : MonoBehaviour
                 Time.timeScale = 1;
                 clearText.SetActive(false);
                 gameClear= false;
-                SceneManager.LoadScene(1);
+                SceneManager.LoadScene(0);
             }
         }
 

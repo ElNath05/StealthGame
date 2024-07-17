@@ -56,6 +56,10 @@ public class Player : MonoBehaviour
             GameManager.Instance.hasRkey = true;
             Destroy(other.gameObject);
         }
+        if (other.CompareTag("Clear"))
+        {
+            GameManager.Instance.gameClear = true;
+        }
     }
     private void OnTriggerStay(Collider other)
     {
